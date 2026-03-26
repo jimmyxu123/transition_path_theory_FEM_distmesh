@@ -39,9 +39,9 @@ def lshape_fd(p: np.ndarray) -> np.ndarray:
 
 
 def pentagon_hole_fd(p: np.ndarray) -> np.ndarray:
-    ang_out = [math.radians(a) for a in [90, 18, -54, -126, 162]]
+    ang_out = np.deg2rad(90 + np.arange(5) * 72.0)  # CCW ordering
     outer = [(1.2 * math.cos(a), 1.2 * math.sin(a)) for a in ang_out]
-    ang_in = [math.radians(a + 30) for a in [90, 18, -54, -126, 162]]
+    ang_in = np.deg2rad(90 + 36 + np.arange(5) * 72.0)  # rotated inner pentagon, CCW
     inner = [(0.38 * math.cos(a), 0.38 * math.sin(a)) for a in ang_in]
     return ddiff(dconvex_polygon(p, outer), dconvex_polygon(p, inner))
 
@@ -54,7 +54,8 @@ def halfdisk_two_holes_fd(p: np.ndarray) -> np.ndarray:
 def main() -> None:
     # Distmesh needs at least one fixed point because of nfix handling in distmesh.py.
     lshape_pfix = np.array([[0.0, 0.0], [2.0, 0.0], [2.0, 1.0], [1.0, 1.0], [1.0, 2.0], [0.0, 2.0]])
-    pent_pfix = np.array([(1.2 * math.cos(a), 1.2 * math.sin(a)) for a in [math.radians(v) for v in [90, 18, -54, -126, 162]]])
+    pent_angles = np.deg2rad(90 + np.arange(5) * 72.0)
+    pent_pfix = np.array([(1.2 * math.cos(a), 1.2 * math.sin(a)) for a in pent_angles])
     half_pfix = np.array([[-1.2, 0.0], [1.2, 0.0], [0.0, -1.2]])
 
     cases = [
