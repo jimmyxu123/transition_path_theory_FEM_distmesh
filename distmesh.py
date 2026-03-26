@@ -120,6 +120,7 @@ def distmesh2D(fd,fh,h0,bbox,pfix):
     Nj = np.size(jremove)
     jremove = np.reshape(jremove,(Nj,))
     pts = np.delete(pts,jremove,0)
+    nfix = 0
     if np.any(pfix): # if pfix is nonempty, i.e., there are fixed points
         pfix = np.unique(pfix, axis = 0) # extract unique rows in pfix
         nfix,d = np.shape(pfix)
@@ -148,7 +149,13 @@ def distmesh2D(fd,fh,h0,bbox,pfix):
         L=np.sqrt(np.sum(barvec**2,axis=1))     # L = Bar lengths
         L = np.reshape(L,(Nbars,1))
         hbars=fh((pts[bars[:,0],:]+pts[bars[:,1],:])/2) 
-        L0=hbars*Fscale*np.sqrt(sum(L**2)/np.sum(hbars**2)) # L0 = Desired lengths
+        denom = np.sum(hbars**2)
+        numer = np.sum(L**2)
+        if denom <= np.finfo(float).eps or numer <= np.finfo(float).eps:
+            scale = 1.0
+        else:
+            scale = Fscale*np.sqrt(numer/denom)
+        L0=hbars*scale # L0 = Desired lengths
         L0 = np.reshape(L0,(Nbars,1))
 
         # density control: remove points if they are too close
@@ -204,7 +211,10 @@ def distmesh2D(fd,fh,h0,bbox,pfix):
         # termination criterion
         idx = np.argwhere(d < - geps) # find interior nodes
         Nidx = np.size(idx)
-        idx = np.reshape(idx,(Nidx,))        
+        idx = np.reshape(idx,(Nidx,))
+        if Nidx == 0:
+            displacement = 0.0
+            break
         displacement = np.amax(np.sqrt(np.sum(deltat*Ftot[idx,:]**2,axis=1))/h0) # mamimal displacement, scaled
         if np.remainder(count,jshow)==0:
             print("count = ",count,"displacement = ",displacement)
