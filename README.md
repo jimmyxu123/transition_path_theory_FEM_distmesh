@@ -110,3 +110,15 @@ python triangulate_assignment_shapes.py
 This writes:
 - `assignment_meshes_pygmsh.png`
 - `assignment_meshes_pygmsh.pdf`
+
+## Assignment 3 triangulation (distmesh.py)
+
+To generate the assignment triangulation figure using the original distmesh workflow in this repo:
+
+```bash
+python triangulate_assignment_distmesh.py
+```
+
+Outputs:
+- `assignment_meshes_distmesh.png`
+- `assignment_meshes_distmesh.pdf`
