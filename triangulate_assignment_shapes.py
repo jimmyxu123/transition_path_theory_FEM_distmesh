@@ -70,7 +70,8 @@ def pentagon_hole_mesh(mesh_size: float = 0.11) -> TriMesh2D:
     with pygmsh.occ.Geometry() as geom:
         outer_loop = geom.add_polygon(outer, mesh_size=mesh_size)
         hole_disk = geom.add_disk([0.15, -0.05], 0.42, 0.42, mesh_size=mesh_size)
-        geom.boolean_difference(outer_loop, hole_disk)
+        pentagon = geom.boolean_difference([outer_loop], [hole_disk])
+        geom.add_physical(pentagon)
         mesh = geom.generate_mesh(dim=2)
     return _to_trimesh(mesh)
 
@@ -90,11 +91,12 @@ def half_disk_two_holes_mesh(mesh_size: float = 0.09) -> TriMesh2D:
             ],
             mesh_size=mesh_size,
         )
-        half_disk = geom.boolean_intersection(outer_disk, clip)
+        half_disk = geom.boolean_intersection([outer_disk], [clip])
 
         h1 = geom.add_disk([-0.8, 0.9], 0.35, 0.35, mesh_size=mesh_size)
         h2 = geom.add_disk([0.9, 0.75], 0.28, 0.28, mesh_size=mesh_size)
-        geom.boolean_difference(half_disk, [h1, h2])
+        half_disk_holes = geom.boolean_difference(half_disk, [h1, h2])
+        geom.add_physical(half_disk_holes)
 
         mesh = geom.generate_mesh(dim=2)
     return _to_trimesh(mesh)
