@@ -66,7 +66,10 @@ def fixmesh(pts,tri):
     # remove repeated nodes
     pts,idx = np.unique(pts,axis = 0,return_inverse = True)
     tri = np.reshape(idx[tri],np.shape(tri))
-    
+
+    if tri.size == 0:
+        return pts, np.zeros((0, 3), dtype=int)
+
     # compute areas of mesh triangles
     A = triarea(pts,tri)
     idx_tri_reorder = np.argwhere(A < 0)
@@ -78,10 +81,17 @@ def fixmesh(pts,tri):
         tri[idx_tri_reorder,0] = tri[idx_tri_reorder,1]
         tri[idx_tri_reorder,1] = tmp
     # remove triangles with too small area
-    idx_keep = np.argwhere(np.absolute(A) > TOL*np.linalg.norm(A,np.inf))
+    if A.size == 0:
+        return pts, np.zeros((0, 3), dtype=int)
+    area_scale = np.linalg.norm(A, np.inf)
+    if area_scale <= np.finfo(float).eps:
+        area_scale = 1.0
+    idx_keep = np.argwhere(np.absolute(A) > TOL*area_scale)
     Nidx = np.size(idx_keep)
     idx_keep = np.reshape(idx_keep,(Nidx,))
-    tri = tri[idx_keep,:]    
+    tri = tri[idx_keep,:]
+    if tri.size == 0:
+        return pts, np.zeros((0, 3), dtype=int)
     # remove unused nodes
     Ntri,m = np.shape(tri)
     t_col = np.reshape(tri,(Ntri*m,))

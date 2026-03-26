@@ -68,7 +68,10 @@ def main() -> None:
         plt.sca(ax)
         pts, tri = distmesh2D(fd, fh, h0, bbox, pfix)
         ax.clear()
-        ax.triplot(pts[:, 0], pts[:, 1], tri, color="#1f4e79", linewidth=0.6)
+        if tri.size == 0:
+            ax.text(0.5, 0.5, "No triangles generated", ha="center", va="center", transform=ax.transAxes)
+        else:
+            ax.triplot(pts[:, 0], pts[:, 1], tri, color="#1f4e79", linewidth=0.6)
         ax.set_aspect("equal")
         ax.set_title(title)
         ax.set_xticks([])
