@@ -56,7 +56,7 @@ def l_shape_mesh(mesh_size: float = 0.12) -> TriMesh2D:
             [0.0, 2.0],
         ]
     )
-    with pygmsh.geo.Geometry() as geom:
+    with pygmsh.occ.Geometry() as geom:
         geom.add_polygon(poly, mesh_size=mesh_size)
         mesh = geom.generate_mesh(dim=2)
     return _to_trimesh(mesh)
@@ -67,7 +67,7 @@ def pentagon_hole_mesh(mesh_size: float = 0.11) -> TriMesh2D:
     angles = np.linspace(math.pi / 2, math.pi / 2 + 2 * math.pi, 5, endpoint=False)
     outer = np.column_stack([cx + r * np.cos(angles), cy + r * np.sin(angles)])
 
-    with pygmsh.geo.Geometry() as geom:
+    with pygmsh.occ.Geometry() as geom:
         outer_loop = geom.add_polygon(outer, mesh_size=mesh_size)
         hole_disk = geom.add_disk([0.15, -0.05], 0.42, 0.42, mesh_size=mesh_size)
         geom.boolean_difference(outer_loop, hole_disk)
@@ -77,7 +77,7 @@ def pentagon_hole_mesh(mesh_size: float = 0.11) -> TriMesh2D:
 
 def half_disk_two_holes_mesh(mesh_size: float = 0.09) -> TriMesh2D:
     # Create full disk, cut with lower half-plane, then remove two holes.
-    with pygmsh.geo.Geometry() as geom:
+    with pygmsh.occ.Geometry() as geom:
         outer_disk = geom.add_disk([0.0, 0.0], 2.0, 2.0, mesh_size=mesh_size)
 
         # Large rectangle that keeps y >= 0 portion.
