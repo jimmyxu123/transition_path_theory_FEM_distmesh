@@ -66,7 +66,10 @@ def fixmesh(pts,tri):
     # remove repeated nodes
     pts,idx = np.unique(pts,axis = 0,return_inverse = True)
     tri = np.reshape(idx[tri],np.shape(tri))
-    
+
+    if tri.size == 0:
+        return pts, np.zeros((0, 3), dtype=int)
+
     # compute areas of mesh triangles
     A = triarea(pts,tri)
     idx_tri_reorder = np.argwhere(A < 0)
@@ -78,10 +81,17 @@ def fixmesh(pts,tri):
         tri[idx_tri_reorder,0] = tri[idx_tri_reorder,1]
         tri[idx_tri_reorder,1] = tmp
     # remove triangles with too small area
-    idx_keep = np.argwhere(np.absolute(A) > TOL*np.linalg.norm(A,np.inf))
+    if A.size == 0:
+        return pts, np.zeros((0, 3), dtype=int)
+    area_scale = np.linalg.norm(A, np.inf)
+    if area_scale <= np.finfo(float).eps:
+        area_scale = 1.0
+    idx_keep = np.argwhere(np.absolute(A) > TOL*area_scale)
     Nidx = np.size(idx_keep)
     idx_keep = np.reshape(idx_keep,(Nidx,))
-    tri = tri[idx_keep,:]    
+    tri = tri[idx_keep,:]
+    if tri.size == 0:
+        return pts, np.zeros((0, 3), dtype=int)
     # remove unused nodes
     Ntri,m = np.shape(tri)
     t_col = np.reshape(tri,(Ntri*m,))
@@ -120,6 +130,7 @@ def distmesh2D(fd,fh,h0,bbox,pfix):
     Nj = np.size(jremove)
     jremove = np.reshape(jremove,(Nj,))
     pts = np.delete(pts,jremove,0)
+    nfix = 0
     if np.any(pfix): # if pfix is nonempty, i.e., there are fixed points
         pfix = np.unique(pfix, axis = 0) # extract unique rows in pfix
         nfix,d = np.shape(pfix)
@@ -148,7 +159,13 @@ def distmesh2D(fd,fh,h0,bbox,pfix):
         L=np.sqrt(np.sum(barvec**2,axis=1))     # L = Bar lengths
         L = np.reshape(L,(Nbars,1))
         hbars=fh((pts[bars[:,0],:]+pts[bars[:,1],:])/2) 
-        L0=hbars*Fscale*np.sqrt(sum(L**2)/np.sum(hbars**2)) # L0 = Desired lengths
+        denom = np.sum(hbars**2)
+        numer = np.sum(L**2)
+        if denom <= np.finfo(float).eps or numer <= np.finfo(float).eps:
+            scale = 1.0
+        else:
+            scale = Fscale*np.sqrt(numer/denom)
+        L0=hbars*scale # L0 = Desired lengths
         L0 = np.reshape(L0,(Nbars,1))
 
         # density control: remove points if they are too close
@@ -204,15 +221,19 @@ def distmesh2D(fd,fh,h0,bbox,pfix):
         # termination criterion
         idx = np.argwhere(d < - geps) # find interior nodes
         Nidx = np.size(idx)
-        idx = np.reshape(idx,(Nidx,))        
+        idx = np.reshape(idx,(Nidx,))
+        if Nidx == 0:
+            displacement = 0.0
+            break
         displacement = np.amax(np.sqrt(np.sum(deltat*Ftot[idx,:]**2,axis=1))/h0) # mamimal displacement, scaled
         if np.remainder(count,jshow)==0:
             print("count = ",count,"displacement = ",displacement)
        
     pts,tri = fixmesh(pts,tri)
-    plt.triplot(pts[:,0],pts[:,1],tri,linewidth=0.1)
-    axes=plt.gca()
-    axes.set_aspect(1)
-    return pts,tri    
+    if tri.size > 0:
+        plt.triplot(pts[:,0],pts[:,1],tri,linewidth=0.1)
+        axes=plt.gca()
+        axes.set_aspect(1)
+    return pts,tri
     
     

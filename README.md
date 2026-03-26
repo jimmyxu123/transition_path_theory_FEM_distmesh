@@ -97,3 +97,28 @@ $$ J_R = Z^{-1}\beta^{-1}e^{-\beta V(x)}\nabla q(x).$$
 
 --> Rrate: The variable Rrate is the transition rate given by:
 $$\nu_{AB} = Z^{-1}\beta^{-1}\int_{D\backslash(A\cup B)} \|\nabla q\|^2e^{-\beta V} dx.$$
+
+## Assignment 4 triangulation (pygmsh)
+
+To triangulate the three assignment domains using standard Python meshing packages:
+
+```bash
+pip install pygmsh meshio matplotlib
+python triangulate_assignment_shapes.py
+```
+
+This writes:
+- `assignment_meshes_pygmsh.png`
+- `assignment_meshes_pygmsh.pdf`
+
+## Assignment 3 triangulation (distmesh.py)
+
+To generate the assignment triangulation figure using the original distmesh workflow in this repo:
+
+```bash
+python triangulate_assignment_distmesh.py
+```
+
+Outputs:
+- `assignment_meshes_distmesh.png`
+- `assignment_meshes_distmesh.pdf`
